@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Login</title>
+    <!-- 필요한 CSS 파일들 -->
+</head>
+<body>
+    <h2>Custom Login Page</h2>
+    <form th:action="@{/api/login}" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required autofocus><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+    <!-- 필요한 JavaScript 파일들 -->
+</body>
+</html>
