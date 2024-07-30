@@ -22,11 +22,16 @@ public class Post {
     private String content;
     private String author;
     private LocalDateTime createdAt;
+    private int views; 
+    private int comments;
+    private String role;
 
     // 생성자, getter, setter 등 필요한 코드 작성
 
     public Post() {
         this.createdAt = LocalDateTime.now();
+        this.views = 0;
+        this.comments = 0;
     }
 
 }

@@ -53,6 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/cats/27").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/check-session").authenticated() // 세션 체크 API 인증 필요
                 .antMatchers(HttpMethod.GET, "/api/missing/all").permitAll() // 모든 사용자에게 실종 동물 조회 API 허용
+                .antMatchers(HttpMethod.POST, "/api/posts").authenticated()
                 .anyRequest().authenticated() // 모든 요청 인증 필요
                 .and()
             .logout()
