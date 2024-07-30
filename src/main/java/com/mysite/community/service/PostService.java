@@ -22,7 +22,9 @@ public class PostService {
     }
 
     public Post getPostById(Long id) {
-        return postRepository.findById(id).orElse(null);
+        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        postRepository.incrementViews(id); // 조회수 증가
+        return post;
     }
 
     public Post createPost(Post post) {
