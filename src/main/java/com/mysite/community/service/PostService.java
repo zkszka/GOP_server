@@ -2,6 +2,8 @@ package com.mysite.community.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import com.mysite.community.repository.PostRepository;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
 
     @Autowired
     public PostService(PostRepository postRepository) {
@@ -23,12 +26,18 @@ public class PostService {
         return postRepository.findAll();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Post getPostById(Long id) {
-        Post post = postRepository.findById(id)
+        // 게시물 조회
+        return postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found"));
-        postRepository.incrementViews(id); // 조회수 증가
-        return post;
+    }
+
+    @Transactional
+    public void incrementPostViews(Long id) {
+        // 조회수 증가
+        logger.debug("Incrementing views for post id: " + id);
+        postRepository.incrementViews(id);
     }
 
     @Transactional
@@ -38,7 +47,6 @@ public class PostService {
 
     @Transactional
     public Post updatePost(Post updatedPost) {
-        // 예시 코드로, 실제 필요에 따라 수정이 필요할 수 있습니다.
         return postRepository.save(updatedPost);
     }
 
