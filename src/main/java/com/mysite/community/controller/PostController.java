@@ -38,8 +38,11 @@ public class PostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+        System.out.println("Fetching post with ID: " + id);
         Post post = postService.getPostById(id);
         if (post != null) {
+            System.out.println("Incrementing views for post ID: " + id);
+            postService.incrementPostViews(id);
             return new ResponseEntity<>(post, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
