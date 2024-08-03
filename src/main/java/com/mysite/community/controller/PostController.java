@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mysite.community.entity.Post;
@@ -31,17 +33,18 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.getAllPosts();
+    public ResponseEntity<List<Post>> getAllPosts(
+        @RequestParam(required = false, defaultValue = "") String searchTerm,
+        @RequestParam(required = false, defaultValue = "popular") String sortOrder
+    ) {
+        List<Post> posts = postService.searchPosts(searchTerm, sortOrder);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-        System.out.println("Fetching post with ID: " + id);
         Post post = postService.getPostById(id);
         if (post != null) {
-            System.out.println("Incrementing views for post ID: " + id);
             postService.incrementPostViews(id);
             return new ResponseEntity<>(post, HttpStatus.OK);
         } else {
@@ -51,14 +54,10 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
-        // 현재 인증된 사용자 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            String loggedInUserEmail = authentication.getName(); // 현재 인증된 사용자의 이메일 가져오기
+            String loggedInUserEmail = authentication.getName();
             post.setAuthor(loggedInUserEmail);
-            // 역할 설정 (필요에 따라)
-            // post.setRole(...);
-
             Post createdPost = postService.createPost(post);
             return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
         } else {
@@ -67,25 +66,33 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
-        Post post = postService.getPostById(id);
-        if (post != null) {
-            updatedPost.setId(id);
-            Post savedPost = postService.updatePost(updatedPost);
-            return new ResponseEntity<>(savedPost, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
+        try {
+            postService.updatePost(id, updatedPost);
+            return ResponseEntity.ok("게시물이 수정되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity<String> deletePost(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication instanceof UsernamePasswordAuthenticationToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자 인증 실패");
+        }
+
+        String loggedInUserEmail = authentication.getName();
         Post post = postService.getPostById(id);
         if (post != null) {
-            postService.deletePost(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            if (post.getAuthor().equals(loggedInUserEmail)) {
+                postService.deletePost(id);
+                return ResponseEntity.ok("게시물이 삭제되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+            }
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시물이 존재하지 않습니다.");
         }
     }
 }
