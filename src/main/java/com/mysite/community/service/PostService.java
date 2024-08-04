@@ -75,4 +75,9 @@ public class PostService {
 
         return posts;
     }
+    
+    public Post findById(Long postId) {
+        return postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+    }
 }
