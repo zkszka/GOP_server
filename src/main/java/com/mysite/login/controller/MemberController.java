@@ -58,20 +58,38 @@ public class MemberController {
 
     @PostMapping("/login")
     public ResponseEntity<MemberResponse> login(@RequestBody MemberLoginRequest loginRequest, HttpServletRequest request) {
-        Member member = memberService.findByEmail(loginRequest.getEmail());
+        // 하드코딩된 이메일과 비밀번호로 인증
+        String hardcodedEmail = "norri1014@naver.com";
+        String hardcodedPassword = "norriGOP1234";
 
-        if (member != null && bCryptPasswordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
+        if (loginRequest.getEmail().equals(hardcodedEmail) && loginRequest.getPassword().equals(hardcodedPassword)) {
             HttpSession session = request.getSession(true);
             System.out.println("Session created: " + session.getId());
+
+            // 인증된 사용자로 설정 (권한은 ADMIN으로 설정)
             SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(member.getEmail(), null, new ArrayList<>())
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), null, new ArrayList<>())
             );
-            MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail());
+
+            // 회원 응답 생성
+            MemberResponse memberResponse = new MemberResponse(null, "운영자", loginRequest.getEmail(), "ADMIN");
             return ResponseEntity.ok(memberResponse);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            Member member = memberService.findByEmail(loginRequest.getEmail());
+            if (member != null && bCryptPasswordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
+                HttpSession session = request.getSession(true);
+                System.out.println("Session created: " + session.getId());
+                SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(member.getEmail(), null, new ArrayList<>())
+                );
+                MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail(), member.getRole());
+                return ResponseEntity.ok(memberResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
         }
     }
+
 
     
     @GetMapping("/check-session")
@@ -81,7 +99,8 @@ public class MemberController {
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
             Member member = memberService.findByEmail(authentication.getName());
             if (member != null) {
-                MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail());
+                // Role을 추가하여 MemberResponse 객체 생성
+                MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail(), member.getRole());
                 return ResponseEntity.ok(memberResponse);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

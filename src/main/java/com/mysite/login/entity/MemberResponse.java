@@ -12,16 +12,17 @@ public class MemberResponse {
     private Long id;
     private String username;
     private String email;
+    private String role; 
 
     // 기본 생성자
     public MemberResponse() {
     }
 
-    // 생성자 (Member 엔티티에서 필요한 필드를 받아 초기화)
-    public MemberResponse(Long id, String username, String email) {
+    // 생성자 (id, username, email, role을 받는 생성자)
+    public MemberResponse(Long id, String username, String email, String role) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.role = role;
     }
-
 }
