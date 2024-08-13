@@ -44,10 +44,14 @@ public class MemberService {
     public Member login(String email, String rawPassword) {
         Member member = findByEmail(email);
 
-        if (member != null && matchesPassword(rawPassword, member.getPassword())) {
-            return member;
-        } else {
-            return null; // 로그인 실패
+        if (member != null) {
+            boolean passwordMatch = matchesPassword(rawPassword, member.getPassword());
+            logger.info("Login attempt: Email: {}, Password matches: {}", email, passwordMatch);
+            if (passwordMatch) {
+                return member;
+            }
         }
+        logger.info("Login failed: Email: {}", email);
+        return null; // 로그인 실패
     }
 }

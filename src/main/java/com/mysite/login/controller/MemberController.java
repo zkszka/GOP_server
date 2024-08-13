@@ -1,21 +1,19 @@
 package com.mysite.login.controller;
 
-import java.util.ArrayList;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,73 +31,72 @@ import com.mysite.login.service.MemberService;
 public class MemberController {
 
     private final MemberService memberService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
     @Autowired
-    public MemberController(MemberService memberService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public MemberController(MemberService memberService, AuthenticationManager authenticationManager) {
         this.memberService = memberService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/join")
     public ResponseEntity<String> join(@RequestBody Member member) {
         try {
-            // 비밀번호 암호화하여 저장
-            String encryptedPassword = bCryptPasswordEncoder.encode(member.getPassword());
-            member.setPassword(encryptedPassword);
-            
+            if (member.getUsername() == null || member.getUsername().isEmpty() ||
+                member.getEmail() == null || member.getEmail().isEmpty() ||
+                member.getPassword() == null || member.getPassword().isEmpty()) {
+                return ResponseEntity.badRequest().body("필수 필드가 누락되었습니다.");
+            }
+
+            // 비밀번호 암호화 제거
+            // 기존 비밀번호를 평문으로 저장
             memberService.saveMember(member);
             return ResponseEntity.ok("회원가입이 완료되었습니다.");
         } catch (Exception e) {
+            logger.error("회원가입 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 중 오류가 발생했습니다.");
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<MemberResponse> login(@RequestBody MemberLoginRequest loginRequest, HttpServletRequest request) {
-        // 하드코딩된 이메일과 비밀번호로 인증
-        String hardcodedEmail = "norri1014@naver.com";
-        String hardcodedPassword = "norriGOP1234";
-
-        if (loginRequest.getEmail().equals(hardcodedEmail) && loginRequest.getPassword().equals(hardcodedPassword)) {
-            HttpSession session = request.getSession(true);
-            System.out.println("Session created: " + session.getId());
-
-            // 인증된 사용자로 설정 (권한은 ADMIN으로 설정)
-            SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), null, new ArrayList<>())
+    public ResponseEntity<MemberResponse> login(@RequestBody MemberLoginRequest loginRequest) {
+        try {
+            // AuthenticationManager를 사용하여 인증
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 회원 응답 생성
-            MemberResponse memberResponse = new MemberResponse(null, "운영자", loginRequest.getEmail(), "ADMIN");
-            return ResponseEntity.ok(memberResponse);
-        } else {
             Member member = memberService.findByEmail(loginRequest.getEmail());
-            if (member != null && bCryptPasswordEncoder.matches(loginRequest.getPassword(), member.getPassword())) {
-                HttpSession session = request.getSession(true);
-                System.out.println("Session created: " + session.getId());
-                SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(member.getEmail(), null, new ArrayList<>())
+            if (member != null) {
+                MemberResponse memberResponse = new MemberResponse(
+                    member.getId(),
+                    member.getUsername(),
+                    member.getEmail(),
+                    member.getRole()
                 );
-                MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail(), member.getRole());
                 return ResponseEntity.ok(memberResponse);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                logger.info("로그인 시도 실패: 사용자 없음. 이메일: {}", loginRequest.getEmail());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             }
+        } catch (BadCredentialsException e) {
+            logger.info("로그인 시도 실패: 비밀번호 불일치. 이메일: {}", loginRequest.getEmail());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        } catch (AuthenticationException e) {
+            logger.error("로그인 중 인증 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
-
-    
     @GetMapping("/check-session")
     public ResponseEntity<MemberResponse> checkSession() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+        if (authentication != null && authentication.isAuthenticated()) {
             Member member = memberService.findByEmail(authentication.getName());
             if (member != null) {
-                // Role을 추가하여 MemberResponse 객체 생성
                 MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail(), member.getRole());
                 return ResponseEntity.ok(memberResponse);
             } else {
