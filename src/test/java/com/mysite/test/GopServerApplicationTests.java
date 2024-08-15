@@ -1,4 +1,4 @@
-package com.mysite;
+package com.mysite.test;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
