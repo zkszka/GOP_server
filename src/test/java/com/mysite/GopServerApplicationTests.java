@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.mysite;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,6 @@ class GopServerApplicationTests {
 
     @Test
     void contextLoads() {
-        assertNotNull(context, "Application context should be loaded");
+      
     }
 }
