@@ -49,7 +49,7 @@ dependencies {
 }
 
 bootJar {
-    mainClassName = 'com.mysite.GopServerApplication'
+      mainClass.set('com.mysite.GopServerApplication')
 }
 
 tasks.named('test') {
