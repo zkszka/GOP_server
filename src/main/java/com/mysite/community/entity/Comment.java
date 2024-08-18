@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 
 @Entity
 public class Comment {
@@ -36,8 +37,14 @@ public class Comment {
     public Comment(String content, String author, Post post) {
         this.content = content;
         this.author = author;
-        this.createdAt = LocalDateTime.now();
         this.post = post;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 
     // getter와 setter

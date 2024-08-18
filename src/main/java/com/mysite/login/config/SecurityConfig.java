@@ -3,6 +3,7 @@ package com.mysite.login.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomUserDetailsService customUserDetailsService;
 
     @Bean
+    @Lazy
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -42,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // OPTIONS 요청 허용
                 .antMatchers(HttpMethod.POST, "/api/login").permitAll() // 로그인 API 허용
                 .antMatchers(HttpMethod.POST, "/api/join").permitAll() // 회원가입 API 허용
-                .antMatchers(HttpMethod.GET, "/api/dogs/crawl").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/dogs/crawl").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/dogs/all").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/cats/all").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/cats/crawl").permitAll()
