@@ -1,3 +1,4 @@
+// CustomUserDetailsService.java
 package com.mysite.login.service;
 
 import java.util.Collections;
@@ -19,10 +20,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private MemberRepository memberRepository;
 
-    // Remove @Autowired for PasswordEncoder
     private final PasswordEncoder passwordEncoder;
 
-    // Constructor-based dependency injection
     @Autowired
     public CustomUserDetailsService(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
