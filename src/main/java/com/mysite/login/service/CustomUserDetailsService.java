@@ -4,6 +4,7 @@ package com.mysite.login.service;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public CustomUserDetailsService(PasswordEncoder passwordEncoder) {
+    public CustomUserDetailsService(@Lazy PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
