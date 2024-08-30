@@ -1,4 +1,3 @@
-// CustomUserDetailsService.java
 package com.mysite.login.service;
 
 import java.util.Collections;

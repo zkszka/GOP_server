@@ -1,38 +1,57 @@
 package com.mysite.community.entity;
 
 import java.time.LocalDateTime;
-
+import java.util.Base64;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "post")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
+    @Column(name = "post_title")
     private String title;
+
+    @Column(name = "post_content")
     private String content;
+
+    @Column(name = "post_author")
     private String author;
+
+    @Column(name = "post_createdAt")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "post_views")
     private int views = 0;
+
+    @Column(name = "post_comments")
     private int comments = 0;
-    private String role;
+
+    @Lob
+    @Column(name = "post_photo")
+    private byte[] photo;
 
     // 기본 생성자
     public Post() {}
 
     // 매개변수가 있는 생성자
-    public Post(String title, String content, String author, LocalDateTime createdAt, int views, int comments, String role) {
+    public Post(String title, String content, String author, LocalDateTime createdAt, int views, int comments, byte[] photo) {
         this.title = title;
         this.content = content;
         this.author = author;
         this.createdAt = createdAt;
         this.views = views;
         this.comments = comments;
-        this.role = role;
+        this.photo = photo;
     }
 
     // getter와 setter
@@ -92,11 +111,18 @@ public class Post {
         this.comments = comments;
     }
 
-    public String getRole() {
-        return role;
+    public byte[] getPhoto() {
+        return photo;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    public String getPhotoUrl() {
+        if (photo != null) {
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(photo);
+        }
+        return null;
     }
 }

@@ -1,11 +1,14 @@
 package com.mysite.community.service;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.mysite.community.entity.Post;
 import com.mysite.community.repository.PostRepository;
 
@@ -43,16 +46,12 @@ public class PostService {
 
     @Transactional
     public Post updatePost(Long id, Post updatedPost) {
-        // 기존 게시물 가져오기
         Post existingPost = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("게시물을 찾을 수 없습니다."));
 
-        // 수정할 필드만 업데이트
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
-        // author, views, 댓글 수 등은 변경하지 않음
 
-        // 수정된 게시물 저장
         return postRepository.save(existingPost);
     }
 
@@ -63,10 +62,8 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<Post> searchPosts(String searchTerm, String sortOrder) {
-        // Use the custom query method defined in PostRepository
         List<Post> posts = postRepository.searchPosts(searchTerm);
 
-        // Sort the posts based on the sortOrder
         if (sortOrder.equals("latest")) {
             posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
         } else if (sortOrder.equals("popular")) {
@@ -75,9 +72,11 @@ public class PostService {
 
         return posts;
     }
-    
-    public Post findById(Long postId) {
-        return postRepository.findById(postId)
+
+    // 추가된 메서드
+    @Transactional(readOnly = true)
+    public Post findById(Long id) {
+        return postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found"));
     }
 }
