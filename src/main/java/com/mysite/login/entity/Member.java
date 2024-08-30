@@ -1,22 +1,34 @@
 package com.mysite.login.entity;
 
 import java.time.LocalDateTime;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "member") // 테이블 이름 지정
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id") // 컬럼 이름 지정
     private Long id;
 
+    @Column(name = "member_name") // 컬럼 이름 지정
     private String username;
+
+    @Column(name = "member_email") // 컬럼 이름 지정
     private String email;
+
+    @Column(name = "member_password") // 컬럼 이름 지정
     private String password;
+
+    @Column(name = "member_role") // 컬럼 이름 지정
     private String role = "USER"; // 기본 role 설정
+
+    @Column(name = "member_createdAt") // 컬럼 이름 지정
     private LocalDateTime createDate = LocalDateTime.now(); // 현재 시간으로 설정
 
     // 기본 생성자

@@ -36,35 +36,4 @@ public class CatController {
         List<Cat> cats = catRepository.findAll();
         return ResponseEntity.ok(cats);
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Cat> getCatById(@PathVariable Long id) {
-        Cat cat = catRepository.findById(id).orElse(null);
-        if (cat == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(cat);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Cat> updateCat(@PathVariable Long id, @RequestBody Cat updatedCat) {
-        Cat existingCat = catRepository.findById(id).orElse(null);
-        if (existingCat == null) {
-            return ResponseEntity.notFound().build();
-        }
-        existingCat.setName(updatedCat.getName());
-        existingCat.setDescription(updatedCat.getDescription());
-        Cat savedCat = catRepository.save(existingCat);
-        return ResponseEntity.ok(savedCat);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCat(@PathVariable Long id) {
-        Cat cat = catRepository.findById(id).orElse(null);
-        if (cat == null) {
-            return ResponseEntity.notFound().build();
-        }
-        catRepository.delete(cat);
-        return ResponseEntity.ok("Deleted cat with id: " + id);
-    }
 }
