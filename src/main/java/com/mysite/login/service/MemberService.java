@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import com.mysite.login.entity.Member;
 import com.mysite.login.repository.MemberRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class MemberService {
 
@@ -53,5 +56,29 @@ public class MemberService {
         }
         logger.info("Login failed: Email: {}", email);
         return null; // 로그인 실패
+    }
+
+    // 모든 회원 목록 조회
+    public List<Member> findAllMembers() {
+        return memberRepository.findAll();
+    }
+
+    // 회원 ID로 조회
+    public Member findMemberById(Long id) {
+        Optional<Member> member = memberRepository.findById(id);
+        return member.orElse(null);
+    }
+
+    // 회원 정보 업데이트
+    public void updateMember(Long id, Member updatedMember) {
+        if (memberRepository.existsById(id)) {
+            updatedMember.setId(id);
+            memberRepository.save(updatedMember);
+        }
+    }
+
+    // 회원 삭제
+    public void deleteMember(Long id) {
+        memberRepository.deleteById(id);
     }
 }
