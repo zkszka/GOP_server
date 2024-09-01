@@ -24,4 +24,8 @@ public class MissingService {
     public List<Missing> getAllMissing() {
         return missingRepository.findAll();
     }
+    
+    public void deleteMissing(Long id) {
+        missingRepository.deleteById(id);
+    }
 }

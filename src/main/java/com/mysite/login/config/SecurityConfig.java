@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
@@ -30,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomUserDetailsService customUserDetailsService;
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -41,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(corsConfigurationSource()) // CORS 설정 추가
+        http.cors().configurationSource(corsConfigurationSource()) // CORS 설정
             .and().csrf().disable() // CSRF 비활성화
             .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // OPTIONS 요청 허용
@@ -59,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated() // 나머지 모든 요청 인증 필요
             .and().logout()
                 .logoutUrl("/api/logout")
-                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
+                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)) // 로그아웃 성공 시 상태 코드 설정
                 .invalidateHttpSession(true) // 세션 무효화
                 .deleteCookies("JSESSIONID") // 쿠키 삭제
                 .logoutSuccessUrl("/login?logout=true") // 로그아웃 후 리다이렉트 URL
@@ -93,4 +94,3 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 }
-
