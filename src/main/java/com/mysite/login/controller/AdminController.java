@@ -44,6 +44,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateMember(@PathVariable Long id, @RequestBody Member updatedMember) {
         try {
+            // 비밀번호와 이메일 필드를 무시하고 업데이트 처리
             memberService.updateMember(id, updatedMember);
             return ResponseEntity.ok("회원 정보가 업데이트되었습니다.");
         } catch (Exception e) {

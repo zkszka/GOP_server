@@ -72,8 +72,18 @@ public class MemberService {
     // 회원 정보 업데이트
     public void updateMember(Long id, Member updatedMember) {
         if (memberRepository.existsById(id)) {
-            updatedMember.setId(id);
-            memberRepository.save(updatedMember);
+            Member existingMember = memberRepository.findById(id).orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+            
+            // 비밀번호와 이메일은 업데이트하지 않음
+            if (updatedMember.getUsername() != null) {
+                existingMember.setUsername(updatedMember.getUsername());
+            }
+            if (updatedMember.getRole() != null) {
+                existingMember.setRole(updatedMember.getRole());
+            }
+
+            // 비밀번호는 암호화된 상태로 유지
+            memberRepository.save(existingMember);
         }
     }
 
