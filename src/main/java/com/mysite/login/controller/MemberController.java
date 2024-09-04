@@ -1,5 +1,8 @@
 package com.mysite.login.controller;
 
+import java.util.Map;
+import java.util.UUID;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mysite.login.entity.Member;
 import com.mysite.login.entity.MemberLoginRequest;
 import com.mysite.login.entity.MemberResponse;
+import com.mysite.login.service.EmailService;
 import com.mysite.login.service.MemberService;
 
 @RestController
@@ -32,12 +36,14 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService; // 이메일 발송 서비스 추가
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
     @Autowired
-    public MemberController(MemberService memberService, AuthenticationManager authenticationManager) {
+    public MemberController(MemberService memberService, AuthenticationManager authenticationManager, EmailService emailService) {
         this.memberService = memberService;
         this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
     }
 
     @PostMapping("/join")
@@ -49,8 +55,6 @@ public class MemberController {
                 return ResponseEntity.badRequest().body("필수 필드가 누락되었습니다.");
             }
 
-            // 비밀번호 암호화 제거
-            // 기존 비밀번호를 평문으로 저장
             memberService.saveMember(member);
             return ResponseEntity.ok("회원가입이 완료되었습니다.");
         } catch (Exception e) {
@@ -62,7 +66,6 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<MemberResponse> login(@RequestBody MemberLoginRequest loginRequest) {
         try {
-            // AuthenticationManager를 사용하여 인증
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
@@ -107,7 +110,6 @@ public class MemberController {
         }
     }
 
-
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -117,6 +119,38 @@ public class MemberController {
             return ResponseEntity.ok("로그아웃 성공");
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그아웃 실패: 인증되지 않음");
+        }
+    }
+
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        Member member = memberService.findByEmail(email);
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일이 존재하지 않습니다.");
+        }
+
+        // 비밀번호 리셋 토큰 생성 및 저장
+        String token = UUID.randomUUID().toString();
+        memberService.savePasswordResetToken(email, token);
+
+        // 비밀번호 리셋 이메일 발송
+        String resetLink = "https://yourdomain.com/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(email, resetLink);
+
+        return ResponseEntity.ok("비밀번호 리셋 이메일을 보냈습니다.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+
+        if (memberService.resetPassword(token, newPassword)) {
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호 변경 실패.");
         }
     }
 }

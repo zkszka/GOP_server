@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+</head>
+<body>
+    <h1 th:text="'Error: ' + ${status}"></h1>
+    <p th:text="${message}"></p>
+    <p>다시 시도해 보세요.</p>
+</body>
+</html>
