@@ -1,14 +1,20 @@
 package com.mysite.login.controller;
-
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -33,7 +39,10 @@ public class GoogleController {
     private String googleRedirectUri;
 
     @Autowired
-    private MemberService memberService; // MemberService 주입
+    private MemberService memberService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @GetMapping("/google")
     public ResponseEntity<Map<String, String>> getGoogleLoginUrl() {
@@ -45,8 +54,10 @@ public class GoogleController {
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(value = "/google/callback", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, String>> loginGoogle(@RequestParam(value = "code") String authCode) {
+    @GetMapping("/google/callback")
+    public ResponseEntity<Map<String, String>> loginGoogle(@RequestParam(value = "code") String authCode, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("Received authCode: " + authCode); // Debugging
+
         RestTemplate restTemplate = new RestTemplate();
 
         // Google OAuth2 토큰 요청
@@ -60,7 +71,7 @@ public class GoogleController {
         ResponseEntity<GoogleResponse> resultEntity = restTemplate.postForEntity(
                 "https://oauth2.googleapis.com/token", googleOAuthRequestParam, GoogleResponse.class);
         String jwtToken = resultEntity.getBody().getId_token();
-        
+
         // Google 사용자 정보 요청
         Map<String, String> map = new HashMap<>();
         map.put("id_token", jwtToken);
@@ -68,6 +79,8 @@ public class GoogleController {
                 "https://oauth2.googleapis.com/tokeninfo", map, GoogleInfResponse.class);
         String email = resultEntity2.getBody().getEmail();
         String username = resultEntity2.getBody().getName();
+
+        System.out.println("User Info: " + username + ", " + email); // Debugging
 
         // 사용자 정보 데이터베이스에 저장
         Member member = memberService.findByEmail(email);
@@ -80,12 +93,14 @@ public class GoogleController {
             memberService.saveMember(member);
         }
 
-        // 세션 생성 (여기서는 JWT를 반환하거나, 세션을 생성하는 로직을 추가)
-        // Map<String, String> response = new HashMap<>();
-        // response.put("id_token", jwtToken);
+        // 사용자 인증 정보 설정
+        Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("id_token", jwtToken);
-        return ResponseEntity.ok(response);
+        // 클라이언트로 응답 반환
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("username", username);
+        responseMap.put("id_token", jwtToken);
+        return ResponseEntity.ok(responseMap);
     }
 }

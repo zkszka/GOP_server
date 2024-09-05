@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,42 +16,54 @@ import com.mysite.crawling.entity.Cat;
 import com.mysite.crawling.repository.CatRepository;
 
 @Service
+@Transactional
 public class CatCrawlingService {
 
     @Autowired
     private CatRepository catRepository;
 
-    @Transactional
-    public void crawlAndSaveCatInfo() throws IOException {
-        // 크롤링할 페이지 URL
-        String url = "https://blog.idbins.com/341";
+//    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
+    public void scrapeData() {
+        String url = "https://univ20.com/12774";
+        try {
+            Document document = Jsoup.connect(url).get();
+            Elements h3Elements = document.select("h3");
+            Elements pElements = document.select("p");
 
-        // Jsoup을 사용하여 페이지를 가져옴
-        Document doc = Jsoup.connect(url).get();
-
-        // 공백이 없는 p 태그를 가져오기
-        Elements pTags = doc.select("p");
-
-        // p 태그의 텍스트를 가져오고, 공백이 없는 경우에만 포함
-        StringBuilder contentBuilder = new StringBuilder();
-        for (Element pTag : pTags) {
-            String text = pTag.text().trim();
-            if (!text.isEmpty()) {
-                contentBuilder.append(text).append("\n");
+            for (Element h3Element : h3Elements) {
+                String title = h3Element.text();
+                if (!title.trim().isEmpty()) {
+                    // h3 태그의 텍스트를 description으로 저장
+                    Cat cat = new Cat(title);
+                    catRepository.save(cat);
+                    System.out.println("Saved h3: " + title);
+                } else {
+                    System.out.println("Skipped empty h3.");
+                }
             }
+
+            for (Element pElement : pElements) {
+                String description = pElement.text();
+                if (!description.trim().isEmpty()) {
+                    // p 태그의 텍스트를 description으로 저장
+                    Cat cat = new Cat(description);
+                    catRepository.save(cat);
+                    System.out.println("Saved p: " + description);
+                } else {
+                    System.out.println("Skipped empty p.");
+                }
+            }
+
+            List<Cat> allCats = catRepository.findAll();
+            System.out.println("All cats: " + allCats); // 모든 Cat 객체 출력
+        } catch (IOException e) {
+            e.printStackTrace(); // 예외 처리 및 로그 기록
+        } catch (Exception e) {
+            e.printStackTrace(); // 다른 예외 처리
         }
-        String content = contentBuilder.toString();
+    }
 
-        // 크롤링한 데이터를 출력하여 확인
-        System.out.println("Crawled content: \n" + content);
-
-        // Cat 엔티티 생성 및 저장
-        Cat cat = new Cat();
-        cat.setDescription(content); // content를 description으로 설정
-        catRepository.save(cat);
-
-        // 저장된 Cat 객체 확인
-        List<Cat> allCats = catRepository.findAll();
-        System.out.println("All cats in database: " + allCats); // 모든 Cat 객체 출력
+    public List<Cat> getAllCats() {
+        return catRepository.findAll();
     }
 }
