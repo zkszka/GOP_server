@@ -1,16 +1,11 @@
-# 애플리케이션 이름
 spring:
   application:
     name: GOP_server
-
-  # 데이터베이스 설정
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:mysql://localhost:3306/gop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-  # JPA 설정
   jpa:
     generate-ddl: true
     show-sql: true
@@ -19,15 +14,11 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       dialect: org.hibernate.dialect.MySQL8Dialect
-
-  # 보안 설정
   security:
     debug: true
-
-  # 메일 설정
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
+    host: smtp.naver.com
+    port: 465
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
@@ -38,17 +29,13 @@ spring:
           auth: true
           ssl:
             enable: true
-
-# 서버 설정
 server:
-  port: ${SERVER_PORT}
+  port: 9977
   error:
     whitelabel:
       enabled: false
-
-# Google OAuth 설정
 google:
   client:
     id: ${GOOGLE_CLIENT_ID}
     pw: ${GOOGLE_CLIENT_PW}
-    redirect-uri: ${GOOGLE_CLIENT_REDIRECT_URI}
+    redirect-uri: http://localhost:3000/oauth2/callback
