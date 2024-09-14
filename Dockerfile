@@ -2,7 +2,7 @@
 FROM openjdk:17 AS build
 WORKDIR /app
 COPY . .
-RUN ./gradlew build
+RUN ./gradlew clean bootJar
 
 # Stage 2: Runtime
 FROM openjdk:17-slim
