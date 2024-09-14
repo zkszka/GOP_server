@@ -16,25 +16,26 @@ public class Missing {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "missing_id") // 컬럼 이름을 'missing_id'로 지정
     private Long id;
 
-    @Column(name = "pet_name", nullable = false)
+    @Column(name = "missing_name", nullable = false) // 컬럼 이름을 'missing_name'으로 지정
     private String petName;
 
-    @Column(name = "species", nullable = false)
+    @Column(name = "missing_species", nullable = false) // 컬럼 이름을 'missing_species'로 지정
     private String species;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "missing_description", nullable = false) // 컬럼 이름을 'missing_description'으로 지정
     private String description;
 
-    @Column(name = "contact_info", nullable = false)
+    @Column(name = "missing_contact", nullable = false) // 컬럼 이름을 'missing_contact'로 지정
     private String contactInfo;
 
     @Lob
-    @Column(name = "photo")
+    @Column(name = "missing_photo") // 컬럼 이름을 'missing_photo'로 지정
     private byte[] photo;
 
-    @Column(name = "created_at")
+    @Column(name = "missing_createdAt") // 컬럼 이름을 'missing_createdAt'으로 지정
     private LocalDateTime createdAt;
 
     public Missing() {

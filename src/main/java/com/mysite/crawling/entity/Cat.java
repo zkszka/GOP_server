@@ -1,5 +1,6 @@
 package com.mysite.crawling.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,37 +11,27 @@ public class Cat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cat_id") // 컬럼 이름을 'cat_id'로 지정
     private Long id;
 
-    private String name; // 기존 title을 name으로 변경
+    @Column(name = "cat_description") // 컬럼 이름을 'cat_description'으로 지정
+    private String description;
 
-    private String description; // 기존 content를 description으로 변경
+    // 기본 생성자
+    public Cat() {}
 
-    // 생성자, getter/setter 등 필요한 메서드 추가
-
-    public Cat() {
-        // 기본 생성자
-    }
-
-    public Cat(String name, String description) {
-        this.name = name;
+    // 매개변수가 있는 생성자
+    public Cat(String description) {
         this.description = description;
     }
 
+    // getter와 setter
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
@@ -55,7 +46,6 @@ public class Cat {
     public String toString() {
         return "Cat{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

@@ -1,11 +1,14 @@
 package com.mysite.login.repository;
 
-import com.mysite.login.entity.Member;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.mysite.login.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Member findByEmail(String email);
+	  Member findByEmail(String email);
+	  Optional<Member> findByPasswordResetToken(String token);
 
-    // 필요한 추가적인 메서드가 있다면 여기에 추가
 }
