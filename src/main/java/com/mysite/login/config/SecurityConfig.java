@@ -48,18 +48,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // OPTIONS 요청 허용
                 .antMatchers(HttpMethod.POST, "/api/login").permitAll() // 로그인 API 허용
                 .antMatchers(HttpMethod.POST, "/api/join").permitAll() // 회원가입 API 허용
+                .antMatchers(HttpMethod.POST, "/api/request-password-reset").permitAll() // 비밀번호 재설정 요청 API 허용
+                .antMatchers(HttpMethod.POST, "/api/reset-password").permitAll() // 비밀번호 재설정 API 허용
                 .antMatchers(HttpMethod.POST, "/api/dogs/crawl").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/dogs/all").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/cats/all").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/cats/crawl").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/request-password-reset").permitAll() 
                 .antMatchers(HttpMethod.GET, "/api/cats/27").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/check-session").authenticated() // 세션 체크 API 인증 필요
                 .antMatchers(HttpMethod.GET, "/api/missing/all").permitAll() // 실종 동물 조회 API 허용
                 .antMatchers(HttpMethod.POST, "/api/posts").authenticated() // 게시물 추가 API 인증 필요
                 .antMatchers("/api/admin/**").hasRole("ADMIN") // ADMIN 권한만 접근 가능
+
                 .antMatchers("/api/v1/oauth2/google", "/api/v1/oauth2/google/callback").permitAll() // 구글 로그인 관련 경로 허용
                 .antMatchers("/favicon.ico").permitAll()
+
+
                 .anyRequest().authenticated() // 나머지 모든 요청 인증 필요
             .and().logout()
                 .logoutUrl("/api/logout")

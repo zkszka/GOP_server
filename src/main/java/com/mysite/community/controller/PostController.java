@@ -59,6 +59,14 @@ public class PostController {
             @RequestParam("content") String content,
             @RequestParam(value = "photo", required = false) MultipartFile photo) {
         
+        // Debugging: Check if photo is null and its size
+        if (photo != null) {
+            System.out.println("Received photo with size: " + photo.getSize());
+        } else {
+            System.out.println("No photo received");
+        }
+
+        // Existing code
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             String loggedInUserEmail = authentication.getName();

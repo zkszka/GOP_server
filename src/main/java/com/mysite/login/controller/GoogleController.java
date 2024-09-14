@@ -1,7 +1,9 @@
 package com.mysite.login.controller;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,23 +70,26 @@ public class GoogleController {
                 .redirectUri(googleRedirectUri)
                 .grantType("authorization_code")
                 .build();
-        ResponseEntity<GoogleResponse> resultEntity = restTemplate.postForEntity(
+        ResponseEntity<GoogleResponse> tokenResponse = restTemplate.postForEntity(
                 "https://oauth2.googleapis.com/token", googleOAuthRequestParam, GoogleResponse.class);
-        String jwtToken = resultEntity.getBody().getId_token();
+        String jwtToken = tokenResponse.getBody().getId_token();
 
         // Google 사용자 정보 요청
         Map<String, String> map = new HashMap<>();
         map.put("id_token", jwtToken);
-        ResponseEntity<GoogleInfResponse> resultEntity2 = restTemplate.postForEntity(
+        ResponseEntity<GoogleInfResponse> userInfoResponse = restTemplate.postForEntity(
                 "https://oauth2.googleapis.com/tokeninfo", map, GoogleInfResponse.class);
-        String email = resultEntity2.getBody().getEmail();
-        String username = resultEntity2.getBody().getName();
+        String email = userInfoResponse.getBody().getEmail();
+        String username = userInfoResponse.getBody().getName();
 
         System.out.println("User Info: " + username + ", " + email); // Debugging
 
         // 사용자 정보 데이터베이스에 저장
-        Member member = memberService.findByEmail(email);
-        if (member == null) {
+        Optional<Member> memberOptional = memberService.findByEmail(email);
+        Member member;
+        if (memberOptional.isPresent()) {
+            member = memberOptional.get();
+        } else {
             member = new Member();
             member.setUsername(username);
             member.setEmail(email);

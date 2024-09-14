@@ -41,21 +41,14 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'ch.qos.logback:logback-classic:1.2.6'
     implementation 'org.seleniumhq.selenium:selenium-java:4.10.0'
-    
-    
-    // Adjusted JUnit versions to be compatible with Spring Boot 2.4.x
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.2'
-    testImplementation 'org.junit.platform:junit-platform-launcher:1.7.2'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.1'
 }
 
 bootJar {
-      mainClass.set('com.mysite.GopServerApplication')
+    mainClass.set('com.mysite.GopServerApplication')
 }
 
 tasks.named('test') {
-    outputs.dir snippetsDir
     useJUnitPlatform()
 }
 

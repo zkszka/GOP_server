@@ -1,7 +1,6 @@
 package com.mysite.login.controller;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,12 +21,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mysite.login.entity.Member;
 import com.mysite.login.entity.MemberLoginRequest;
 import com.mysite.login.entity.MemberResponse;
-import com.mysite.login.service.EmailService;
 import com.mysite.login.service.MemberService;
 
 @RestController
@@ -36,14 +35,12 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthenticationManager authenticationManager;
-    private final EmailService emailService; // 이메일 발송 서비스 추가
     private static final Logger logger = LoggerFactory.getLogger(MemberController.class);
 
     @Autowired
-    public MemberController(MemberService memberService, AuthenticationManager authenticationManager, EmailService emailService) {
+    public MemberController(MemberService memberService, AuthenticationManager authenticationManager) {
         this.memberService = memberService;
         this.authenticationManager = authenticationManager;
-        this.emailService = emailService;
     }
 
     @PostMapping("/join")
@@ -66,13 +63,16 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<MemberResponse> login(@RequestBody MemberLoginRequest loginRequest) {
         try {
+            // AuthenticationManager를 사용하여 인증
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            Member member = memberService.findByEmail(loginRequest.getEmail());
-            if (member != null) {
+            // MemberService에서 Optional<Member>를 사용하여 사용자 찾기
+            Optional<Member> memberOptional = memberService.findByEmail(loginRequest.getEmail());
+            if (memberOptional.isPresent()) {
+                Member member = memberOptional.get();
                 MemberResponse memberResponse = new MemberResponse(
                     member.getId(),
                     member.getUsername(),
@@ -98,8 +98,10 @@ public class MemberController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
-            Member member = memberService.findByEmail(authentication.getName());
-            if (member != null) {
+            // 현재 로그인한 사용자의 이메일을 기반으로 사용자 찾기
+            Optional<Member> memberOptional = memberService.findByEmail(authentication.getName());
+            if (memberOptional.isPresent()) {
+                Member member = memberOptional.get();
                 MemberResponse memberResponse = new MemberResponse(member.getId(), member.getUsername(), member.getEmail(), member.getRole());
                 return ResponseEntity.ok(memberResponse);
             } else {
@@ -121,36 +123,32 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그아웃 실패: 인증되지 않음");
         }
     }
-
+    
     @PostMapping("/request-password-reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        Member member = memberService.findByEmail(email);
-        if (member == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일이 존재하지 않습니다.");
+    public ResponseEntity<String> requestPasswordReset(@RequestBody MemberLoginRequest loginRequest) {
+        try {
+            String email = loginRequest.getEmail();
+            memberService.requestPasswordReset(email);
+            return ResponseEntity.ok("비밀번호 재설정 이메일이 전송되었습니다.");
+        } catch (Exception e) {
+            logger.error("비밀번호 재설정 요청 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 재설정 요청 중 오류가 발생했습니다.");
         }
-
-        // 비밀번호 리셋 토큰 생성 및 저장
-        String token = UUID.randomUUID().toString();
-        memberService.savePasswordResetToken(email, token);
-
-        // 비밀번호 리셋 이메일 발송
-        String resetLink = "https://yourdomain.com/reset-password?token=" + token;
-        emailService.sendPasswordResetEmail(email, resetLink);
-
-        return ResponseEntity.ok("비밀번호 리셋 이메일을 보냈습니다.");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        String newPassword = request.get("newPassword");
-
-        if (memberService.resetPassword(token, newPassword)) {
-            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호 변경 실패.");
+    public ResponseEntity<String> resetPassword(
+        @RequestParam String token, @RequestParam String newPassword) {
+        try {
+            boolean success = memberService.resetPassword(token, newPassword);
+            if (success) {
+                return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호 재설정 실패: 유효하지 않은 토큰.");
+            }
+        } catch (Exception e) {
+            logger.error("비밀번호 재설정 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호 재설정 중 오류가 발생했습니다.");
         }
     }
 }

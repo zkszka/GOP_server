@@ -10,6 +10,7 @@ import com.mysite.login.entity.Member;
 import com.mysite.login.service.MemberService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -32,12 +33,9 @@ public class AdminController {
     @GetMapping("/members/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Member> getMemberById(@PathVariable Long id) {
-        Member member = memberService.findMemberById(id);
-        if (member != null) {
-            return ResponseEntity.ok(member);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Member> member = memberService.findMemberById(id);
+        return member.map(ResponseEntity::ok)
+                     .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/members/{id}")

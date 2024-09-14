@@ -31,6 +31,12 @@ public class Member {
     @Column(name = "member_createdAt") // 컬럼 이름 지정
     private LocalDateTime createDate = LocalDateTime.now(); // 현재 시간으로 설정
 
+    @Column(name = "password_reset_token") // 비밀번호 재설정 토큰 컬럼
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expiry") // 비밀번호 재설정 토큰 만료 시간 컬럼
+    private LocalDateTime passwordResetTokenExpiry;
+
     // 기본 생성자
     public Member() {}
 
@@ -90,5 +96,21 @@ public class Member {
 
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
+    }
+
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiry() {
+        return passwordResetTokenExpiry;
+    }
+
+    public void setPasswordResetTokenExpiry(LocalDateTime passwordResetTokenExpiry) {
+        this.passwordResetTokenExpiry = passwordResetTokenExpiry;
     }
 }
