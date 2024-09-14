@@ -7,5 +7,5 @@ RUN ./gradlew clean bootJar
 # Stage 2: Runtime
 FROM openjdk:17-slim
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/app.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
