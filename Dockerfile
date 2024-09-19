@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY . .
 
-# 필수 패키지 설치 (alpine 기반 이미지는 apk 사용)
+# 필수 패키지 설치
 RUN apt update && apt install -y wget unzip
 
 # Gradle Wrapper 다운로드 및 설치
@@ -21,9 +21,11 @@ FROM openjdk:17-slim
 
 WORKDIR /app
 
+# JAR 파일 복사 (명시적으로 파일 이름 지정)
 COPY --from=build /app/build/libs/GOP_server-0.0.1-SNAPSHOT.jar /app/GOP_server.jar
 
-# 9977 포트 노출
+
 EXPOSE 9977
 
+# ENTRYPOINT 수정: JAR 파일 경로를 명시적으로 지정
 ENTRYPOINT ["java", "-jar", "/app/GOP_server.jar"]

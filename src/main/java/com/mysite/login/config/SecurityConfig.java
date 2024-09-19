@@ -59,11 +59,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/missing/all").permitAll() // 실종 동물 조회 API 허용
                 .antMatchers(HttpMethod.POST, "/api/posts").authenticated() // 게시물 추가 API 인증 필요
                 .antMatchers("/api/admin/**").hasRole("ADMIN") // ADMIN 권한만 접근 가능
-
                 .antMatchers("/api/v1/oauth2/google", "/api/v1/oauth2/google/callback").permitAll() // 구글 로그인 관련 경로 허용
                 .antMatchers("/favicon.ico").permitAll()
-
-
                 .anyRequest().authenticated() // 나머지 모든 요청 인증 필요
             .and().logout()
                 .logoutUrl("/api/logout")
@@ -86,7 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // 허용할 출처 설정
+        configuration.setAllowedOrigins(Arrays.asList("https://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app")); // 클라우드 타입의 프론트엔드 주소 추가
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
