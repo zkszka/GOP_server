@@ -46,4 +46,4 @@ google:
   client:
     id: ${GOOGLE_CLIENT_ID}
     pw: ${GOOGLE_CLIENT_PW}
-    redirect-uri: http://svc.sel4.cloudtype.app:31392/oauth2/callback
+    redirect-uri: https://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app/oauth2/callback
