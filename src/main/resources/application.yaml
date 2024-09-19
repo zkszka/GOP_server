@@ -2,7 +2,7 @@ spring:
   application:
     name: GOP_server
   datasource:
-    url: jdbc:mysql://mysql-server:3306/gop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mariadb:3306/gop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
