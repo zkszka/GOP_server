@@ -6,8 +6,8 @@ build/
 !**/src/test/**/build/
 
 # Ignore application properties and YAML files
-# application.properties
-# src/main/resources/application.properties
+ application.properties
+ src/main/resources/application.properties
 
 
 ### STS ###
