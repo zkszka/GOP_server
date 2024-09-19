@@ -45,5 +45,4 @@ google:
   client:
     id: ${GOOGLE_CLIENT_ID}
     pw: ${GOOGLE_CLIENT_PW}
-    # 클라우드 타입의 리다이렉트 URI로 수정
-    redirect-uri: https://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app/oauth2/callback
+    redirect-uri: http://localhost:3000/oauth2/callback
