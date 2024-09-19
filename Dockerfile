@@ -24,7 +24,7 @@ WORKDIR /app
 # JAR 파일 복사 (명시적으로 파일 이름 지정)
 COPY --from=build /app/build/libs/GOP_server-0.0.1-SNAPSHOT.jar /app/GOP_server.jar
 
-# 9977 포트 노출
+
 EXPOSE 9977
 
 # ENTRYPOINT 수정: JAR 파일 경로를 명시적으로 지정
