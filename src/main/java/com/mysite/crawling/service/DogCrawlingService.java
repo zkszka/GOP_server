@@ -23,7 +23,7 @@ public class DogCrawlingService {
     private DogRepository dogRepository;
 
     // 주기적으로 크롤링
-//    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scrapeData() {
         String url = "https://m.dongascience.com/news.php?idx=15282";
         try {
