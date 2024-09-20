@@ -86,7 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app")); // 클라우드 서버 URL로 변경
+        configuration.setAllowedOriginPatterns(Arrays.asList("https://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app")); // 클라우드 서버 URL로 변경
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
