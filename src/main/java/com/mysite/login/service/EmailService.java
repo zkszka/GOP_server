@@ -20,7 +20,7 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("GOP 비밀번호 재설정 요청");
         message.setText("비밀번호 재설정을 위해 아래 링크를 클릭하세요:\n" +
-        		"http://localhost:3000/login/new_pw?token=" + token);
+        		"http://web-gopprj-m128ei6pc6510b38.sel4.cloudtype.app/login/new_pw?token=" + token);
         javaMailSender.send(message);
     }
 }
