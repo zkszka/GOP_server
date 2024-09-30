@@ -24,7 +24,7 @@ public class CatCrawlingService {
 
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scrapeData() {
-        String url = "https://univ20.com/12774";
+        String url = "https://blog.naver.com/kangsamo2019/223226582529";
         try {
             Document document = Jsoup.connect(url).get();
             Elements h3Elements = document.select("h3");

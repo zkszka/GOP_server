@@ -25,7 +25,7 @@ public class DogCrawlingService {
     // 주기적으로 크롤링
     @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scrapeData() {
-        String url = "https://m.dongascience.com/news.php?idx=15282";
+        String url = "https://blog.naver.com/kangsamo2019/223226582529";
         try {
             Document document = Jsoup.connect(url).get();
             Elements pElements = document.select("p");
