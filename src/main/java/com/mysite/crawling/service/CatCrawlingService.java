@@ -22,6 +22,8 @@ public class CatCrawlingService {
     @Autowired
     private CatRepository catRepository;
 
+    // 주기적으로 크롤링
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void scrapeData() {
         String url = "https://univ20.com/12774";
         try {
