@@ -8,7 +8,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +28,14 @@ public class DogCrawlingService {
             Elements pElements = document.select("p");
 
             for (Element pElement : pElements) {
-                String description = pElement.text();
-                
-                // 크롤링한 데이터를 출력하여 확인
+                String description = pElement.text().trim();
+
                 System.out.println("Crawled description: " + description);
 
-                if (!description.trim().isEmpty()) { // 빈 값이 아닌 경우만 저장
+                if (!description.isEmpty()) {
                     // Dog 객체 생성 및 저장
                     Dog dog = new Dog(description);
                     dogRepository.save(dog);
-
                     System.out.println("Saved: " + description);
                 } else {
                     System.out.println("Skipped empty description.");
@@ -46,11 +43,13 @@ public class DogCrawlingService {
             }
 
             List<Dog> allDogs = dogRepository.findAll();
-            System.out.println("All dogs: " + allDogs); // 모든 Dog 객체 출력
+            System.out.println("All dogs: " + allDogs);
         } catch (IOException e) {
-            e.printStackTrace(); // 예외 처리 및 로그 기록
+            System.err.println("Error connecting to the URL: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace(); // 다른 예외 처리
+            System.err.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
